@@ -1,0 +1,4 @@
+Title: Annual Review Data Tool
+Author: Banks Grubbs
+#DisplayMode: Showcase
+Type: Shiny
