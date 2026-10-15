@@ -40,8 +40,8 @@ server <- function(input, output, session) {
     selected_nd_method <- input$nd_handling
     
     ## Lazy shortcut for now that can be improved by refining database
-    selected_tab <- case_when(selected_year == "2024" & selected_nd_method == "Half" ~ 'DMR_2024_NDasHalf',
-                              selected_year == "2024" & selected_nd_method == "Zero" ~ 'DMR_2024_NDasZero')
+    selected_tab <- case_when(selected_year == "2024" & selected_nd_method == "Half" ~ 'dmr_2024_nd_as_half',
+                              selected_year == "2024" & selected_nd_method == "Zero" ~ 'dmr_2024_nd_as_zero')
     
     ## Initialize Query --------------------------------------------------------
     # Connect to table in database with dplyr and define starting point for query
@@ -164,8 +164,8 @@ server <- function(input, output, session) {
         reframe(.by = c(npdes_permit_number, 
                         pollutant_code,
                         psc_code))%>%
-        tibble()%>%
-        mutate(pollutant_code = as.numeric(pollutant_code))
+        tibble()#%>%
+        #mutate(pollutant_code = as.numeric(pollutant_code))
       
       ## Query database  ---------------------------------------------------------
       df <- user_query()%>%

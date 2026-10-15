@@ -2,29 +2,34 @@
 
 # Get Options Available for User to Select on UI --------------------------
 
-fn_get_input_choices <- function(db_path = "inputs/dmr-database.db"){
-  # Setup initial helper choices from DB to populate selector items dynamically
-  if (file.exists(db_path) == TRUE) {
-    con <- dbConnect(RSQLite::SQLite(), db_path)
-    
-    sic_choices <- dbReadTable(con, "sic_list")$sic_code
-    sic_choices <- sic_choices[!is.na(sic_choices)]
-    
-    pollutant_choices <- dbReadTable(con, "pollutant_list")$pollutant_description
-    pollutant_choices <- pollutant_choices[!is.na(pollutant_choices)]
-    
-    state_choices <- dbReadTable(con, "states_list")$state
-    state_choices <- state_choices[!is.na(state_choices)]
-    
-    psc_choices <- dbReadTable(con, "psc_list")$psc_full
+fn_get_input_choices <- function(db_path = "inputs/dmr-database.db",
+                                 db_dbname = "PLGpar",
+                                 db_host = "10.3.2.179",
+                                 db_port = 5432,
+                                 db_user = "dmr_readonly_user",
+                                 db_password = "dmr-dashboard-database-access"){
+  con <- dbConnect(
+    RPostgres::Postgres(),
+    dbname = db_dbname,
+    host = db_host,
+    port = db_port,
+    user = db_user,
+    password = db_password
+  )
+  dbExecute(con, "SET search_path TO 'dmr-database';")
 
-    
-    dbDisconnect(con)
-  } else {
-    # Fallback placeholders if database file is not yet initialized in the local workspace directory
 
-    
-  }
+  sic_choices <- dbReadTable(con, "xwalk_psc_code_to_desc")$sic_code
+  sic_choices <- sic_choices[!is.na(sic_choices)]
+  
+  pollutant_choices <- dbReadTable(con, "pollutant_list")$pollutant_description
+  pollutant_choices <- pollutant_choices[!is.na(pollutant_choices)]
+  
+  state_choices <- dbReadTable(con, "states_list")$state
+  state_choices <- state_choices[!is.na(state_choices)]
+  
+  psc_choices <- dbReadTable(con, "xwalk_psc_code_to_desc")$psc_full
+
   return(list(state_choices = state_choices, 
               pollutant_choices = pollutant_choices, 
               sic_choices = sic_choices,
@@ -61,7 +66,7 @@ fn_process_dmr_dat <- function(filtered_dmr_df,
   # ALREADY FILTERED BY REQUIRED CRITERIA
   # If ALL of the samples at a facility have ZERO loads, then exclude that facility.
   # So if there's a SINGLE pollutant at the facility with a loading, it's included
-  filt_list_farah <- dbReadTable(con, "filt_list_farah")
+  annual_review_facs_2024 <- dbReadTable(con, "annual_review_facs_2024")
   
   ## Read in DMR Data --------------------------------------------------------
   
@@ -75,7 +80,7 @@ fn_process_dmr_dat <- function(filtered_dmr_df,
     mutate(pollutant_code = as.character(pollutant_code))%>%
     mutate(across(where(is_character), ~na_if(., "")))%>%
     tibble()%>%
-    inner_join(filt_list_farah, 
+    inner_join(annual_review_facs_2024, 
                by = join_by(npdes_permit_number, 
                             psc_code))%>%
     # Filter out rows where no PSC Code is available/matched. Large percentage is expected and ok

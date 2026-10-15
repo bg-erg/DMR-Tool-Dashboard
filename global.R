@@ -31,9 +31,16 @@ suppressPackageStartupMessages({
 
 options(shiny.reactlog=TRUE) 
 
+con <- dbConnect(
+  RPostgres::Postgres(),
+  dbname = "PLGpar",
+  host = "10.3.2.179",
+  port = 5432,
+  user = "dmr_readonly_user",
+  password = "dmr-dashboard-database-access"
+)
+dbExecute(con, "SET search_path TO 'dmr-database';")
 
-db_path <- "inputs/dmr-database.db"
-con <- dbConnect(RSQLite::SQLite(), db_path)
 
 # Initialize functions
 source("functions.R")
@@ -50,5 +57,5 @@ query_loading_screen <- tagList(
 
 # Get crosswalk from PSC Code to PSC Description from database-------------------
 # Add four additional PSC descriptions that aren't official ELGs; used internally
-psc_desc <- dbReadTable(con, "psc_list")%>% 
+psc_desc <- dbReadTable(con, "xwalk_psc_code_to_desc")%>% 
   reframe(.by = c(psc_code, psc_desc))
