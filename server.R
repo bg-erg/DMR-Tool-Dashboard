@@ -3,7 +3,10 @@
 server <- function(input, output, session) {
   
   # Initialize waiter function
-  w = Waiter$new(html = query_loading_screen)
+  w <- Waiter$new(html = query_loading_screen)
+  
+  w_dl <- Waiter$new(html = dl_load_screen,
+                     color = transparent(.85))
   
   # Pull demo data if the user has toggled the 
   demo_mode_dat <- eventReactive(input$run_btn, {
@@ -294,7 +297,9 @@ server <- function(input, output, session) {
     filename = fn_full_dat_filename(file_extension = ".csv"),
     
     content = function(file) {
+      w_dl$show()
       write.csv(final_data(), file, row.names = FALSE)
+      w_dl$hide()
     }
   )
 
@@ -305,7 +310,9 @@ server <- function(input, output, session) {
     filename = fn_summ_dat_filename(file_extension = ".csv"),
     
     content = function(file) {
+      w_dl$show() # show and hide loading overlay
       write.csv(summarized_data_psc(), file, row.names = FALSE)
+      w_dl$hide()
     }
   )  
   
@@ -315,6 +322,7 @@ server <- function(input, output, session) {
     filename = fn_summ_dat_filename(file_extension = ".xlsx"),
     
     content = function(file) {
+      w_dl$show() # Show waiter loading overlay
       
       # Define custom style
       
@@ -346,6 +354,9 @@ server <- function(input, output, session) {
       saveWorkbook(wb, 
                    file, 
                    overwrite = TRUE)
+      
+      # Hide waiter overlay
+      w_dl$hide()
     }
   )  
   

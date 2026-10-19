@@ -178,7 +178,7 @@ ui <- page_navbar(
         class = "btn-info",
         icon = shiny::icon("file-csv")),
       
-      p("Note: It may take several seconds for the download to begin for large datasets."),
+      p("Note: It may take several seconds for the File Explorer to appear for large datasets."),
       
       hr(), # Horizontal Line
       

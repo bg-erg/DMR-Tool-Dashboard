@@ -29,6 +29,10 @@ suppressPackageStartupMessages({
   library(scales)
 })
 
+packageDescription("DBI")
+
+packageVersion("shiny")
+
 options(shiny.reactlog=TRUE) 
 
 con <- dbConnect(
@@ -53,6 +57,11 @@ query_loading_screen <- tagList(
   spin_flower(), # Preview other spinners by running `preview_spinner(spin_chasing_dots())`
   h3("Querying Database"),
   h5("Please be patient, depending on the size of the resulting table, this can take a while!"))
+
+dl_load_screen <- tagList(
+  spin_3(),
+  h4("Preparing Download...",
+     style = "color: #444444;"))
 
 
 # Get crosswalk from PSC Code to PSC Description from database-------------------
