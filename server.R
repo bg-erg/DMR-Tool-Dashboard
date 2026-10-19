@@ -298,7 +298,7 @@ server <- function(input, output, session) {
     
     content = function(file) {
       w_dl$show()
-      write.csv(final_data(), file, row.names = FALSE)
+      data.table::fwrite(final_data(), file, row.names = FALSE)
       w_dl$hide()
     }
   )
@@ -311,7 +311,7 @@ server <- function(input, output, session) {
     
     content = function(file) {
       w_dl$show() # show and hide loading overlay
-      write.csv(summarized_data_psc(), file, row.names = FALSE)
+      data.table::fwrite(summarized_data_psc(), file, row.names = FALSE)
       w_dl$hide()
     }
   )  
