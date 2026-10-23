@@ -1,37 +1,39 @@
 # Eventually make it so required packages are all saved in a local subdirectory
 # Being buggy rn
-# suppressPackageStartupMessages({
-#   library(shiny, lib.loc = "dependencies")
-#   library(bslib, lib.loc = "dependencies")
-#   library(DBI, lib.loc = "dependencies")
-#   library(RSQLite, lib.loc = "dependencies")
-#   library(ggplot2, lib.loc = "dependencies")
-#   library(DT, lib.loc = "dependencies")
-#   library(tidyverse, lib.loc = "dependencies")
-#   library(waiter, lib.loc = "dependencies")
-#   library(openxlsx, lib.loc = "dependencies")
-#   library(dbplyr, lib.loc = "dependencies")
-
-# })
 
 suppressPackageStartupMessages({
-  library(shiny)
-  library(bslib)
-  library(DBI)
-  library(RSQLite)
-  library(ggplot2)
-  library(DT)
-  library(tidyverse)
-  library(waiter)
-  library(openxlsx)
-  library(dbplyr)
-  library(tidytext)
-  library(scales)
-})
+  library(shiny, lib.loc = "dependencies")
+  library(bslib, lib.loc = "dependencies")
+  library(DBI, lib.loc = "dependencies")
+  library(RSQLite, lib.loc = "dependencies")
+  library(ggplot2, lib.loc = "dependencies")
+  library(DT, lib.loc = "dependencies")
+  library(tidyverse, lib.loc = "dependencies")
+  library(waiter, lib.loc = "dependencies")
+  library(openxlsx, lib.loc = "dependencies")
+  library(dbplyr, lib.loc = "dependencies")
+  library(scales, lib.loc = "dependencies")
+  library(tidytext, lib.loc = "dependencies")
+  
+  }
+  )
 
-packageDescription("DBI")
 
-packageVersion("shiny")
+# suppressPackageStartupMessages({
+#   library(shiny)
+#   library(bslib)
+#   library(DBI)
+#   library(RSQLite)
+#   library(ggplot2)
+#   library(DT)
+#   library(tidyverse)
+#   library(waiter)
+#   library(openxlsx)
+#   library(dbplyr)
+#   library(tidytext)
+#   library(scales)
+# })
+
 
 options(shiny.reactlog=TRUE) 
 
@@ -66,5 +68,5 @@ dl_load_screen <- tagList(
 
 # Get crosswalk from PSC Code to PSC Description from database-------------------
 # Add four additional PSC descriptions that aren't official ELGs; used internally
-psc_desc <- dbReadTable(con, "xwalk_psc_code_to_desc")%>% 
+psc_desc <- DBI::dbReadTable(con, "xwalk_psc_code_to_desc")%>% 
   reframe(.by = c(psc_code, psc_desc))
