@@ -77,14 +77,6 @@ server <- function(input, output, session) {
       query <- query %>% filter(state %in% !!selected_states)
     }
     
-    ## EPA Region --------------------------------------------------------------
-    if (is.null(input$epa_region_select) == FALSE && length(input$epa_region_select) > 0) {
-      
-      # Get EPA Region; remove the preceding "Region " text 
-      epa_regions <<- str_remove(input$epa_region_select, "Region ")#%>%#as.numeric()
-      
-      query <- query %>% filter(epa_region %in% !!epa_regions)
-    }
 
     ## Pollutant -------------------------------------------------------------------
     if (!is.null(input$pollutant_select) && length(input$pollutant_select) > 0) {
@@ -114,7 +106,7 @@ server <- function(input, output, session) {
       message("Filtering PSC Code(s)")
       
       xwalk_psc <- tbl(con, "xwalk_psc_pollcodes")%>%
-        select(!c(parameter_code, parameter_desc))%>%
+        distinct(npdes_permit_number, pollutant_code, psc_code)%>% # effectively the same as reframe
         filter(psc_code %in% selected_psc)
       
       query <- query%>%
@@ -184,6 +176,7 @@ server <- function(input, output, session) {
       ## Query database  ---------------------------------------------------------
       df <- user_query()%>%
         collect()
+      
       # 
       # # Append PSC Codes --------------------------------------------------------
       # message("Appending PSC Codes")
