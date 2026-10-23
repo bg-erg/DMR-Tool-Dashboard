@@ -6,6 +6,8 @@ testing.R
 inputs/_brand.yml
 inputs/crosswalks/
 inputs/demo_dat/
+inputs/old/
+inputs/reference_dat/
 inputs/dmr-database.db
 inputs/Add_to_record_DMR_Summary_2026.09.02.xlsx
 inputs/reference_dat/LTMonPerCustomSearch-2024Non-POTWs-08142026.csv
