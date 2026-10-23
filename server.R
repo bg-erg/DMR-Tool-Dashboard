@@ -65,24 +65,7 @@ server <- function(input, output, session) {
     } else{
       query <- query
     }
-    
-      
-    
-    
-    ## PSC Codes -------------------------------------------------------------------
-    
-    if (!is.null(input$psc_select) && length(input$psc_select) > 0) {
-      # Get selected PSC Codes
-      selected_psc <<- input$psc_select%>%
-        str_extract("^\\d\\d\\d")
-      
-      # Update selection box in the "Visualizations" tab to only show PSCs selected by user
-      updateSelectInput(session, "select_plot_pscs", choices = input$psc_select) 
-      
-    } else {
-      selected_psc <<- NULL
-    }
-    
+  
     ## State -------------------------------------------------------------------
     if (!is.null(input$state_select) && length(input$state_select) > 0) {
       
@@ -118,6 +101,32 @@ server <- function(input, output, session) {
       query <- query %>% filter(pollutant_description %in% !!selected_pollutants)
     }
     
+    ## PSC Codes -------------------------------------------------------------------
+    
+    if (!is.null(input$psc_select) && length(input$psc_select) > 0) {
+      # Get selected PSC Codes
+      selected_psc <<- input$psc_select%>%
+        str_extract("^\\d\\d\\d")
+      
+      # Update selection box in the "Visualizations" tab to only show PSCs selected by user
+      updateSelectInput(session, "select_plot_pscs", choices = input$psc_select) 
+      
+      message("Filtering PSC Code(s)")
+      
+      xwalk_psc <- tbl(con, "xwalk_psc_pollcodes")%>%
+        select(!c(parameter_code, parameter_desc))%>%
+        filter(psc_code %in% selected_psc)
+      
+      query <- query%>%
+        inner_join(xwalk_psc, 
+                   by = join_by(npdes_permit_number == npdes_permit_number, 
+                                pollutant_code == pollutant_code))
+      
+    } else {
+      selected_psc <<- NULL
+    }
+    
+    
     # Return Query with Additions from User Selections ------------------------
     
     return(query)
@@ -127,11 +136,13 @@ server <- function(input, output, session) {
   # Generate and Preview SQL query --------------------------------------------
 
   output$query_text <- renderText({
+    
     # Require that user_query() has been executed before updating
     req(user_query())
     
     # Translate from dbplyr to SQL and print to console and dashboard
     sql_string <- user_query() %>% sql_render()
+    
     message("Generated SQL Script:\n", sql_string, "\n")
     
     return(as.character(sql_string)) # Not sure that this is needed
@@ -163,35 +174,35 @@ server <- function(input, output, session) {
       
       
       message("Sending query to Database...")
-      xwalk_psc <- dbReadTable(con, "xwalk_psc_pollcodes")%>%
-        reframe(.by = c(npdes_permit_number, 
-                        pollutant_code,
-                        psc_code))%>%
-        tibble()#%>%
-        #mutate(pollutant_code = as.numeric(pollutant_code))
+      # xwalk_psc <- dbReadTable(con, "xwalk_psc_pollcodes")%>%
+      #   reframe(.by = c(npdes_permit_number, 
+      #                   pollutant_code,
+      #                   psc_code))%>%
+      #   tibble()#%>%
+      #   #mutate(pollutant_code = as.numeric(pollutant_code))
       
       ## Query database  ---------------------------------------------------------
       df <- user_query()%>%
         collect()
-      
-      # Append PSC Codes --------------------------------------------------------
-      message("Appending PSC Codes")
-      df<-df%>%
-        left_join(xwalk_psc, 
-                  by = join_by(npdes_permit_number,
-                               pollutant_code),
-                  relationship = "many-to-many")
+      # 
+      # # Append PSC Codes --------------------------------------------------------
+      # message("Appending PSC Codes")
+      # df<-df%>%
+      #   left_join(xwalk_psc, 
+      #             by = join_by(npdes_permit_number,
+      #                          pollutant_code),
+      #             relationship = "many-to-many")
       
       # Filter for PSC Codes Defined by User ------------------------------------
   
-      # PSC Codes aren't included in the database table, so we can't filter them
-      # out with the SQL query. So instead we join and filter out here. 
-      if (is.null(selected_psc) == FALSE && length(selected_psc) > 0) {
-        df <- df%>%
-          filter(psc_code %in% selected_psc)
-      } else{
-      }
-      
+      # # PSC Codes aren't included in the database table, so we can't filter them
+      # # out with the SQL query. So instead we join and filter out here. 
+      # if (is.null(selected_psc) == FALSE && length(selected_psc) > 0) {
+      #   df <- df%>%
+      #     filter(psc_code %in% selected_psc)
+      # } else{
+      # }
+      # 
       message("Query complete! Total rows retrieved: ", nrow(df))
       message("\nData snapshot columns: ", paste(colnames(df), collapse = ", "))
       
